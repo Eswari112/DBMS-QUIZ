@@ -9,31 +9,38 @@
             font-weight: bold;
             display: none;
         }
-        .question {
-            margin-bottom: 20px;
-        }
+        .question { margin-bottom: 20px; }
     </style>
 </head>
+
 <body oncontextmenu="return false;">
 
 <h2>Secure Quiz</h2>
+
+<!-- LOGIN -->
+<div id="loginBox">
+    <label>Name:</label><br>
+    <input type="text" id="name"><br><br>
+
+    <label>Register Number:</label><br>
+    <input type="text" id="regno"><br><br>
+
+    <button onclick="startQuiz()">Start Quiz</button>
+</div>
+
 <p id="warning" class="warning">⚠ Cheating detected! Quiz is being auto-submitted...</p>
 
-<form id="quizForm">
-
+<form id="quizForm" style="display:none;">
     <div id="quizContainer"></div>
-
     <button type="submit">Submit</button>
 </form>
 
 <script>
 let violated = false;
+let userName = "";
+let userRegNo = "";
 
-// ===============================
-//  SHUFFLE QUESTIONS FEATURE
-// ===============================
-
-// Add your questions here
+// QUESTIONS
 const questions = [
     { q: "What is AI?", name: "q1" },
     { q: "Define Machine Learning.", name: "q2" },
@@ -41,12 +48,12 @@ const questions = [
     { q: "What is a Dataset?", name: "q4" }
 ];
 
-// Shuffle function
+// Shuffle
 function shuffle(array) {
     return array.sort(() => Math.random() - 0.5);
 }
 
-// Display shuffled questions
+// Load questions
 function loadQuestions() {
     const container = document.getElementById("quizContainer");
     const shuffled = shuffle([...questions]);
@@ -59,53 +66,59 @@ function loadQuestions() {
             <label>${index + 1}. ${item.q}</label><br>
             <input type="text" name="${item.name}" required><br>
         `;
-
         container.appendChild(div);
     });
 }
 
-loadQuestions();
+// Start quiz
+function startQuiz() {
+    userName = document.getElementById("name").value;
+    userRegNo = document.getElementById("regno").value;
 
-// ===============================
-//  ANTI-CHEATING FEATURES
-// ===============================
+    if (userName === "" || userRegNo === "") {
+        alert("Enter name and register number!");
+        return;
+    }
 
-// Auto-submit on first cheating violation
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("quizForm").style.display = "block";
+
+    loadQuestions();
+    document.documentElement.requestFullscreen();
+}
+
+// CHEATING DETECTION
 document.addEventListener("visibilitychange", function () {
     if (document.hidden && !violated) {
         violated = true;
         document.getElementById("warning").style.display = "block";
 
         alert("Cheating detected! Quiz is auto-submitted.");
-        document.getElementById("quizForm").submit();
+
+        autoSubmit("Auto-Submitted (Violation)");
     }
 });
 
-// Disable copy/paste/cut/select/right-click
+// Disable actions
 ["copy","paste","cut","selectstart","contextmenu"].forEach(evt => {
     document.addEventListener(evt, e => e.preventDefault());
 });
 
-// Force fullscreen on load
-document.addEventListener("DOMContentLoaded", () => {
-    document.documentElement.requestFullscreen();
+// Prevent leaving page
+window.onbeforeunload = () => "You cannot leave the quiz!";
+
+// SUBMIT HANDLING
+document.getElementById("quizForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    autoSubmit("Submitted");
 });
 
-// Block page close or reload
-window.onbeforeunload = function () {
-    return "You cannot leave the quiz!";
-};
-<script>
-
-// your quiz code here…
-  
+// GOOGLE SHEET SUBMISSION
 function submitToGoogleSheet(name, regno, score, time, status) {
     fetch("https://script.google.com/macros/s/AKfycbwyD2sfvlCYRNgztKuVL3Mmzxztatd_TwjwlW6iXb5ji5-NiF29Mr9Cdw5XzkSaUnMDww/exec", {
         method: "POST",
         mode: "no-cors",
-        headers: {
-            "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             name: name,
             regno: regno,
@@ -115,35 +128,23 @@ function submitToGoogleSheet(name, regno, score, time, status) {
         })
     });
 }
-<script>
 
-submitToGoogleSheet(
-    userName,       // student name
-    userRegNo,      // register no
-    finalScore,     // total score
-    timeTaken,      // total time used
-    "Submitted"     // status
-);
-submitToGoogleSheet(
-    userName,
-    userRegNo,
-    scoreSoFar,
-    timeTaken,
-    "Auto-Submitted (Violation)"
-);
+// FINAL SUBMIT FUNCTION
+function autoSubmit(status) {
+    let timeTaken = "N/A"; 
+    let score = 0; // you can add auto-scoring later
 
+    submitToGoogleSheet(userName, userRegNo, score, timeTaken, status);
 
-
-</script>
-</body>
-</html>
-
-
-
+    alert("Your quiz is submitted.");
+    window.location.href = "index.html"; // redirect home
+}
 </script>
 
 </body>
 </html>
+
+
 
 
 
