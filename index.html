@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Secure Quiz</title>
+    <style>
+        body { font-family: Arial; }
+        .warning { 
+            color: red;
+            font-weight: bold;
+            display: none;
+        }
+        .question {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+<h2>Secure Quiz</h2>
+<p id="warning" class="warning">⚠ Cheating detected! Quiz is being auto-submitted...</p>
+
+<form id="quizForm">
+
+    <div id="quizContainer"></div>
+
+    <button type="submit">Submit</button>
+</form>
+
+<script>
+let violated = false;
+
+// ===============================
+//  SHUFFLE QUESTIONS FEATURE
+// ===============================
+
+// Add your questions here
+const questions = [
+    { q: "What is AI?", name: "q1" },
+    { q: "Define Machine Learning.", name: "q2" },
+    { q: "What is Deep Learning?", name: "q3" },
+    { q: "What is a Dataset?", name: "q4" }
+];
+
+// Shuffle function
+function shuffle(array) {
+    return array.sort(() => Math.random() - 0.5);
+}
+
+// Display shuffled questions
+function loadQuestions() {
+    const container = document.getElementById("quizContainer");
+    const shuffled = shuffle([...questions]);
+
+    shuffled.forEach((item, index) => {
+        const div = document.createElement("div");
+        div.className = "question";
+
+        div.innerHTML = `
+            <label>${index + 1}. ${item.q}</label><br>
+            <input type="text" name="${item.name}" required><br>
+        `;
+
+        container.appendChild(div);
+    });
+}
+
+loadQuestions();
+
+// ===============================
+//  ANTI-CHEATING FEATURES
+// ===============================
+
+// Auto-submit on first cheating violation
+document.addEventListener("visibilitychange", function () {
+    if (document.hidden && !violated) {
+        violated = true;
+        document.getElementById("warning").style.display = "block";
+
+        alert("Cheating detected! Quiz is auto-submitted.");
+        document.getElementById("quizForm").submit();
+    }
+});
+
+// Disable copy/paste/cut/select/right-click
+["copy","paste","cut","selectstart","contextmenu"].forEach(evt => {
+    document.addEventListener(evt, e => e.preventDefault());
+});
+
+// Force fullscreen on load
+document.addEventListener("DOMContentLoaded", () => {
+    document.documentElement.requestFullscreen();
+});
+
+// Block page close or reload
+window.onbeforeunload = function () {
+    return "You cannot leave the quiz!";
+};
+</script>
+
+</body>
+</html>
