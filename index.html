@@ -95,7 +95,54 @@ document.addEventListener("DOMContentLoaded", () => {
 window.onbeforeunload = function () {
     return "You cannot leave the quiz!";
 };
+<script>
+
+// your quiz code here…
+  
+function submitToGoogleSheet(name, regno, score, time, status) {
+    fetch("https://script.google.com/macros/s/AKfycbwyD2sfvlCYRNgztKuVL3Mmzxztatd_TwjwlW6iXb5ji5-NiF29Mr9Cdw5XzkSaUnMDww/exec", {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            name: name,
+            regno: regno,
+            score: score,
+            time: time,
+            status: status
+        })
+    });
+}
+submitToGoogleSheet(
+    userName,       // student name
+    userRegNo,      // register no
+    finalScore,     // total score
+    timeTaken,      // total time used
+    "Submitted"     // status
+);
+submitToGoogleSheet(
+    userName,
+    userRegNo,
+    scoreSoFar,
+    timeTaken,
+    "Auto-Submitted (Violation)"
+);
+
+
+
+</script>
+</body>
+</html>
+
+
+
 </script>
 
 </body>
 </html>
+
+
+
+
